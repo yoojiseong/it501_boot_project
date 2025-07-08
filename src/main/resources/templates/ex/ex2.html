@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="www.thymeleaf.org"
+        lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>서버에서 전달 받은 데이터 사용하기</h1>
+<div th:text="${list}"></div>
+<div th:text="${map}"></div>
+<div th:text="${dto}"></div>
+<h2>[[...]] 표현식으로도 가능</h2>
+[[${list}]]
+[[${map}]]
+[[${dto}]]
+
+<h1>서버에서 전달 받은 데이터 사용하기, 자바스크립트 태그 안에서</h1>
+<script th:inline="javascript">
+    const list = [[${list}]]
+    const map = [[${map}]]
+    const dto = [[${dto}]]
+
+    console.log(list)
+    console.log(map)
+    console.log(dto)
+</script>
+</body>
+</html>
