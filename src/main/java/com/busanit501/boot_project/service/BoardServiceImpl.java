@@ -75,7 +75,7 @@ public class BoardServiceImpl implements BoardService{
         Page<Board> result = boardRepository.searchAll(types,keyword,pageable);
 
         //result.getContent() => List<Board>
-        // .stream().map(): 리스트의 모든 요소를 하나씩 순회 하면서 타입 변환시키고 전부 순회
+        // .stream()f.map(): 리스트의 모든 요소를 하나씩 순회 하면서 타입 변환시키고 전부 순회
         //board -> modelMapper.map(board, BoardDTO.class)
         // collect => 변횐된 DTO를 다시 리스트로 변환
         List<BoardDTO> dtoList = result.getContent().stream().map(board-> modelMapper.map(board, BoardDTO.class)).collect(Collectors.toList());

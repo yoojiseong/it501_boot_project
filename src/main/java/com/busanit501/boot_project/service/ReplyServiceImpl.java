@@ -70,6 +70,7 @@ public class ReplyServiceImpl implements ReplyService {
         log.info("ReplyServiceImpl 에서, modify ,데이터 확인2 reply: " + reply);
         // 교체할 데이터로 교체 작업 후,
         reply.changeReplyText(replyDTO.getReplyText());
+        reply.changeReplyer(replyDTO.getReplyer());
 
         // 교체 후, 데이터 확인 한번 더, 정상, 변경할 댓글 내용으로 수정이됨.
         log.info("ReplyServiceImpl 에서, modify ,데이터 확인3 reply: " + reply);

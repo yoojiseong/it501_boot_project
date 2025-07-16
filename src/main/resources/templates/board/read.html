@@ -357,6 +357,47 @@
         printReplies(page,size)
     },false)
 
+    //수정 모달창
+    modifyBtn.addEventListener("click", function (e) {
+        const replyObj = {
+            bno : bno,
+            rno : replyHeader.innerHTML,
+            replyText : modifyText.value,
+            replyer : modifyReplyer.value
+        }
+        // 비동기 처리, reply.js 에서, addReply 이용하기.
+        modifyReply(replyObj).then(result => {
+            alert(result.rno + "댓글 수정완료")
+            modifyModal.hide()
+            modifyText.value = ""
+            modifyReplyer.value = ""
+            // 댓글 수정 후, 맨 마지막 페이지 이동.
+            printReplies(page,size)
+        }).catch(e => {
+            alert("예외가 발생했습니다.")
+        })
+    },false)
+
+    // 수정 모달 창 -> 닫기 버튼
+    closeModifyBtn.addEventListener("click", function (e) {
+       modifyModal.hide()
+    },false)
+
+    // 삭제 이벤트 리스너 추가하기.
+    removeBtn.addEventListener("click", function (e) {
+        // 비동기 처리, reply.js 에서, addReply 이용하기.
+        removeReply(replyHeader.innerHTML).then(result => {
+            alert(result.rno + "댓글 삭제 완료")
+            modifyModal.hide()
+            modifyText.value = ""
+            modifyReplyer.value = ""
+            // 댓글 삭제 후, 맨 첫 페이지 이동.
+            printReplies(page,size)
+        }).catch(e => {
+            alert("예외가 발생했습니다.")
+        })
+    },false)
+
     // 참고하기.
     // console.log(get1(bno))
     // reply.js 에서, Promise 형태로 데이터를 받고서,

@@ -36,4 +36,5 @@ public class Reply extends BaseEntitiy {
     public void changeReplyText(String text) {
         this.replyText = text;
     }
+    public void changeReplyer(String replier){this.replyer = replier;}
 }

@@ -1,6 +1,8 @@
 package com.busanit501.boot_project.repository;
 
 import com.busanit501.boot_project.domain.Board;
+import com.busanit501.boot_project.domain.BoardImage;
+import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,17 +11,22 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.annotation.Commit;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
 @SpringBootTest
 @Log4j2
 public class BoardRepositoryTests {
+
     @Autowired
     private BoardRepository boardRepository;
 
+    @Autowired
+    private ReplyRepository replyRepository;
     //JpaRepository이용해서 기본 crud확인(sql언어 몰라도 자바 메서드로만 가능)
     // 1. insert
     @Test
@@ -131,4 +138,75 @@ public class BoardRepositoryTests {
         log.info("조회될 데이터 10개 : "+ result.getContent());
         todoList.forEach(board -> log.info(board));
     }
+
+    //첨부된 이미지 포함해서 게시글 작성
+    @Test
+    public void testInsertWithImages(){
+        // 더미 데이터 만들기
+        Board board = Board.builder()
+                .title("첨부 이미지 추가한 게시글 테스트")
+                .content("첨부 파일 추가해서 게시글 작성 테스트")
+                .writer("유지성")
+                .build();
+        //더미 데이터2 첨부 이미지
+
+        for(int i=0;i<3;i++)
+        {
+            board.addImage(UUID.randomUUID().toString(), "file"+i+".jpg");
+        }
+        boardRepository.save(board);
+    }
+
+    //Lazy로딩 확인 해보기.
+    // 게시글 하나 조회시 여기에 첨부된 이미지들도 조회를 하는 부분
+    @Test
+    @Transactional
+    public void testReadWithImages(){
+        // 실제로 존재하는 이미지가 있는 게시글 확인
+//        Optional<Board> result = boardRepository.findById(109L);
+        Optional<Board> result = boardRepository.findByIdWithImages(109L);
+        Board board = result.orElseThrow();
+        log.info("testReadWithImages에서 : 확인 board " + board);
+//        log.info("board의 이미지 확인 : "+ board.getImageSet());
+        for(BoardImage boardImage : board.getImageSet()){
+            log.info("첨부 이미지 확인 : "+boardImage);
+        }
+    }
+
+    //첨부된 이미지를 수정해보기, 고아 객체들의 처리 유무 확인
+    @Test
+    @Transactional
+    @Commit
+    public void testModifyImages(){
+        // 게시글1 에 첨부이미지 , img1.jpg, img2.jpg, img3.jpg
+        // 수정
+        // 게시글1 에 첨부이미지 변경, test1.jpg, test2.jpg, test3.jpg 수정함.
+        // 기존 첨부 이미지 :  img1.jpg, img2.jpg, img3.jpg , 어떻게 될까요?
+        // 실제 디비에도 기록이 된 상태.
+        // 상황이, 부모인 게시글1이 없어진 상태 : 고아 객체.
+        // 스프링에서, 고아 객체, 가비지 컬렉션이 알아서 자동 수거 하게 하면 됨.
+
+        // 실제 각자 디비에 있는 더미 데이터로 확인 .
+        Optional<Board> result =  boardRepository.findByIdWithImages(109L);
+        Board board = result.orElseThrow();
+
+        // 기존 보드에 첨부된 이미지를 , 클리어 하고,
+        board.clearImages();
+
+        // 새로운 첨부 이미지들로 교체
+        for(int i = 0; i < 3; i++) {
+            board.addImage(UUID.randomUUID().toString(),"Update-file-2"+i+".jpg");
+        }
+        boardRepository.save(board);
+    }
+
+    @Test
+    @Transactional
+    @Commit
+    public void testRemoveAll(){
+        // 실제로 삭제할 데이터 : 109L
+        replyRepository.deleteByBoard_Bno(111L);
+        boardRepository.deleteById(111L);
+    }
+
 }
